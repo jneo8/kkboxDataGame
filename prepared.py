@@ -72,6 +72,7 @@ class Prepared():
 
         df = pd.DataFrame(raw_data, columns=['user_id', 'title_id'])
         df.to_csv(os.path.join(DATA_DIR, 'test_result.csv'))
+        logger.info('finish')
 
     def train(self):
         """Prepared train data."""
