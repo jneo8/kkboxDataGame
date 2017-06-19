@@ -18,7 +18,7 @@ DATA_DIR = os.path.join(BASE_DIR, 'data/')
 class Prepared():
     """Prepared."""
 
-    # events_train = pd.read_csv(os.path.join(DATA_DIR, 'events_train.csv'))
+    events_train = pd.read_csv(os.path.join(DATA_DIR, 'events_train.csv'))
     # labels_train = pd.read_csv(os.path.join(DATA_DIR, 'labels_train.csv'))
     events_test = pd.read_csv(os.path.join(DATA_DIR, 'events_test.csv'))
 
@@ -75,28 +75,36 @@ class Prepared():
 
     def train(self):
         """Prepared train data."""
-        # self.events_train['watch_time'].hist(bins=500, figsize=(10, 15))
-        # plt.savefig('events_train_watch_time')
-        # subprocess.call(['catimg', '-f', 'events_train_watch_time.png'])
-
         uqique_title = self.events_train['title_id'].unique()
-        logger.debug(uqique_title)
-        logger.debug(len(uqique_title))
-
+        uqique_title.sort()
+        uqique_title = np.array([str(t) for t in uqique_title])
         uqique_user = self.events_train['user_id'].unique()
-        logger.debug(uqique_user)
-        logger.debug(len(uqique_user))
-        # self.events_train['ww'] = np.rint(self.events_train['watch_time'] / 1000)
-        # logger.debug(self.events_train['ww'].value_counts())
-        # logger.debug(self.events_train.head())
-        # self.events_train.to_csv(
-        #     os.path.join(DATA_DIR, 'events_train123.csv'),
-        # )
-        # self.events_train['title_id'].hist(bins=200, figsize=(20, 15))
-        # plt.savefig('events_train-title_id')
-        # subprocess.call(['catimg', '-f', 'events_train-title_id.png'])
+        uqique_user.sort()
 
+        raw_data = {
+            t: []
+            for t in uqique_title
+        }
+        raw_data.update({'user_id': []})
+        for idx, u in enumerate(uqique_user):
+            data = self.events_train[(self.events_train.user_id == u)]
+            base = {
+                t: 0
+                for t in uqique_title
+            }
+            for index, row in data.iterrows():
+                base[str(row.title_id)] += row.watch_time
+            logger.debug(base)
+            raw_data['user_id'].append(u)
+            for t in uqique_title:
+                raw_data[t].append(base[t])
+            logger.debug(idx)
+        logger.debug(raw_data)
+        columns_ = [t for t in uqique_title]
+        columns_ = ['user_id'] + columns_
+        df = pd.DataFrame(raw_data, columns=columns_)
+        df.to_csv(os.path.join(DATA_DIR, 'events_train_v1.csv'))
 
 if __name__ == '__main__':
     p = Prepared()
-    p.test()
+    p.train()
