@@ -57,7 +57,7 @@ class Prepared():
         # logger.debug(dir(self.events_test))
 
         raw_data = {'user_id': [], 'title_id': []}
-        for idx, u in enumerate(user_list[:500]):
+        for idx, u in enumerate(user_list):
             data = self.events_test[(self.events_test.user_id == u)]
             dict_ = {}
             for index, row in data.iterrows():
@@ -72,12 +72,6 @@ class Prepared():
 
         df = pd.DataFrame(raw_data, columns=['user_id', 'title_id'])
         df.to_csv(os.path.join(DATA_DIR, 'test_result.csv'))
-
-        test_result = pd.read_csv(os.path.join(DATA_DIR, 'test_result.csv'))
-        logger.debug(test_result.head())
-
-
-        # logger.debug(user_list)
 
     def train(self):
         """Prepared train data."""
