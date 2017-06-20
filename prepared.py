@@ -94,12 +94,10 @@ class Prepared():
             }
             for index, row in data.iterrows():
                 base[str(row.title_id)] += row.watch_time
-            logger.debug(base)
             raw_data['user_id'].append(u)
             for t in uqique_title:
                 raw_data[t].append(base[t])
             logger.debug(idx)
-        logger.debug(raw_data)
         columns_ = [t for t in uqique_title]
         columns_ = ['user_id'] + columns_
         df = pd.DataFrame(raw_data, columns=columns_)
