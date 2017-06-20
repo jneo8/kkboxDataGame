@@ -3,10 +3,13 @@ import os
 import subprocess
 from datetime import datetime
 
+import random
 import pandas as pd
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import svm
+from sklearn.model_selection import train_test_split
+from sklearn.model_selection import cross_val_score
 
 from confs import logconf
 
@@ -30,30 +33,42 @@ class Train():
     def __init__(self):
         """Init."""
         # train_x = pd.read_csv(os.path.join(DATA_DIR, 'events_train_v1.csv'))
-        self.train = read(name='events_train_v1')
-        self.train_x = self.train.drop(self.train.columns[[0]], axis=1)
 
-        self.label = read(name='labels_train')
-        self.label_x = self.label['title_id'].values.tolist()
+        limit = 2000
+        # limit = 62307
 
-        some = 75315
-        self.some_digit = self.train.loc[some]
-        self.some_digit_label = self.label.loc[some]
+        x = read(name='events_train_v1')
+        x = (
+            x.drop(x.columns[[0]], axis=1)
+            .iloc[0:limit]
+        )
+        y = read(name='labels_train')
+        y = y['title_id'].values.tolist()[:limit]
+
+        test_size = 0.2
+        self.x_train, self.x_test, self.y_train, self.y_test = (
+            train_test_split(
+                x, y, test_size=test_size, random_state=42
+            )
+        )
 
     def main(self):
         """Step."""
         self._svm()
-        # logger.debug(self.label_x[:200])
-
-        # logger.debug(self.train_x.iloc(self.num))
 
     def _svm(self):
         """SVM."""
-        clf = svm.SVC()
-        clf.fit(self.train_x, self.label_x)
+        svc_clf = svm.SVC()
+        svc_clf.fit(self.x_train, self.y_train)
 
-        logger.info(clf.predict(self.some_digit))
-        logger.info(self.some_digit_label)
+        scores = cross_val_score(
+            svc_clf,
+            self.x_test,
+            self.y_test,
+            cv=3,
+            scoring="accuracy",
+        )
+        logger.debug(scores)
 
 if __name__ == '__main__':
     t = Train()

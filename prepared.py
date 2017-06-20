@@ -51,7 +51,7 @@ class Prepared():
         subprocess.call(['catimg', '-f', 'events_test.png'])
 
         user_list = self.events_test['user_id'].unique()
-
+        user_list.sort()
         # logger.debug(type(self.events_test))
 
         # logger.debug(dir(self.events_test))
@@ -105,4 +105,4 @@ class Prepared():
 
 if __name__ == '__main__':
     p = Prepared()
-    p.train()
+    p.test()
