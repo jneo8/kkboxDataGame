@@ -97,7 +97,7 @@ class Train():
         mlp_clf.fit(self.x_train, self.y_train)
 
         logger.debug(
-            mlp_clf.score(self.x_test, self.y_test)        
+            mlp_clf.score(self.x_test, self.y_test)
         )
         joblib.dump(
             mlp_clf,
@@ -108,16 +108,14 @@ class Train():
         """RandomForestClassifier."""
         rfc_clf = RandomForestClassifier(random_state=42)
         rfc_clf.fit(self.x_train, self.y_train)
-        
         logger.info(
-            rfc_clf.score(self.x_test, self.y_test)        
+            rfc_clf.score(self.x_test, self.y_test)
         )
 
         joblib.dump(
             rfc_clf,
             os.path.join(PKL_DIR, 'rfc.pkl')
         )
-        
 
 if __name__ == '__main__':
     t = Train()

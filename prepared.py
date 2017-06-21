@@ -95,14 +95,15 @@ class Prepared():
 
     def train(self):
         """Prepared train data."""
+
+        uqique_user = self.events_train['user_id'].unique()[:100]
+        uqique_user.sort()
+
         uqique_title = self.events_train['title_id'].unique()
         uqique_title.sort()
         uqique_title = np.array([str(t) for t in uqique_title])
-        uqique_user = self.events_train['user_id'].unique()
-        uqique_user.sort()
 
-        raw_data = {
-        }
+        raw_data = {}
 
         len_ = len(uqique_user)
         for t in uqique_title:
@@ -112,7 +113,23 @@ class Prepared():
                     'times_{}'.format(t): [],
                 }
             )
+
         raw_data.update({'user_id': []})
+
+        time_list = []
+        for m in [6, 7, 8, 9, 10]:
+            for d in range(1, 32):
+                for h in range(0, 24):
+                    time_list.append('{m}_{d}_{h}'.format(m=m, d=d, h=h))
+
+        for tl in time_list:
+            raw_data.update(
+                {
+                    tl: []
+                }
+            )
+
+        # Start Gen
         for idx, u in enumerate(uqique_user):
             data = self.events_train[(self.events_train.user_id == u)]
             base = {}
@@ -125,7 +142,26 @@ class Prepared():
 
                     }
                 )
+
+            for tl in time_list:
+                base.update(
+                    {
+                        tl: 0
+                    }
+                )
+
             for index, row in data.iterrows():
+                base[
+                    (
+                        '{m}_{d}_{h}'
+                        .format(
+                            m=datetime.fromtimestamp(row.time).month,
+                            d=datetime.fromtimestamp(row.time).day,
+                            h=datetime.fromtimestamp(row.time).hour,
+                        )
+                    )
+                ] += 1
+
                 base[str(row.title_id)] += row.watch_time
                 base['times_{}'.format(t)] += 1
             raw_data['user_id'].append(u)
@@ -134,15 +170,18 @@ class Prepared():
                 raw_data['times_{}'.format(t)].append(
                     base['times_{}'.format(t)]
                 )
+            for tl in time_list:
+                raw_data[tl].append(base[tl])
             logger.debug('{idx} : {len}'.format(idx=idx, len=len_))
         columns_ = (
+            ['user_id'] +
             [t for t in uqique_title] +
-            ['times_{}'.format(t) for t in uqique_title]
+            ['times_{}'.format(t) for t in uqique_title] +
+            [tl for tl in time_list]
         )
-        columns_ = ['user_id'] + columns_
         df = pd.DataFrame(raw_data, columns=columns_)
-        df.to_csv(os.path.join(DATA_DIR, 'events_train_v2.csv'))
+        df.to_csv(os.path.join(DATA_DIR, 'events_train_v3.csv'))
 
 if __name__ == '__main__':
     p = Prepared()
-    p.test()
+    p.train()
