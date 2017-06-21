@@ -44,34 +44,54 @@ class Prepared():
 
     def test(self):
         """Prepared test data."""
-        # info of event_test.csv
-        logger.debug(self.events_test.head())
-        self.events_test.hist(bins=50, figsize=(20, 15))
-        plt.savefig('events_test')
-        subprocess.call(['catimg', '-f', 'events_test.png'])
+        origin_data = self.events_test
+        uqique_title = origin_data['title_id'].unique()
+        uqique_title.sort()
+        uqique_title = np.array([str(t) for t in uqique_title])
+        uqique_user = origin_data['user_id'].unique()
+        uqique_user.sort()
 
-        user_list = self.events_test['user_id'].unique()
-        user_list.sort()
-        # logger.debug(type(self.events_test))
+        raw_data = {
+        }
 
-        # logger.debug(dir(self.events_test))
+        len_ = len(uqique_user)
+        for t in uqique_title:
+            raw_data.update(
+                {
+                    t: [],
+                    'times_{}'.format(t): [],
+                }
+            )
+        raw_data.update({'user_id': []})
+        for idx, u in enumerate(uqique_user):
+            data = origin_data[(origin_data.user_id == u)]
+            base = {}
 
-        raw_data = {'user_id': [], 'title_id': []}
-        for idx, u in enumerate(user_list):
-            data = self.events_test[(self.events_test.user_id == u)]
-            dict_ = {}
+            for t in uqique_title:
+                base.update(
+                    {
+                        t: 0,
+                        'times_{}'.format(t): 0,
+
+                    }
+                )
             for index, row in data.iterrows():
-                if dict_.get(row.title_id):
-                    dict_[row.title_id] += row.watch_time
-                else:
-                    dict_[row.title_id] = row.watch_time
-            key = max(dict_, key=dict_.get)
+                base[str(row.title_id)] += row.watch_time
+                base['times_{}'.format(t)] += 1
             raw_data['user_id'].append(u)
-            raw_data['title_id'].append(key)
-            logger.debug('test csv {}'.format(idx))
-
-        df = pd.DataFrame(raw_data, columns=['user_id', 'title_id'])
-        df.to_csv(os.path.join(DATA_DIR, 'test_result.csv'))
+            for t in uqique_title:
+                raw_data[t].append(base[t])
+                raw_data['times_{}'.format(t)].append(
+                    base['times_{}'.format(t)]
+                )
+            logger.debug('{idx} : {len}'.format(idx=idx, len=len_))
+        columns_ = (
+            [t for t in uqique_title] +
+            ['times_{}'.format(t) for t in uqique_title]
+        )
+        columns_ = ['user_id'] + columns_
+        df = pd.DataFrame(raw_data, columns=columns_)
+        df.to_csv(os.path.join(DATA_DIR, 'events_test_v2.csv'))
 
     def train(self):
         """Prepared train data."""
