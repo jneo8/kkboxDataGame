@@ -30,17 +30,17 @@ class Prepared():
         """Prepared test data."""
         self.gen(
             origin_data=self.events_train,
-            name='events_train_v7'
+            name='events_train_v8'
         )
 
         self.gen(
             origin_data=self.events_test,
-            name='events_test_v7',
+            name='events_test_v8',
         )
 
     def gen(self, origin_data, name):
         """Prepared train data."""
-        uqique_user = origin_data['user_id'].unique()
+        uqique_user = origin_data['user_id'].unique()[:100]
         uqique_user.sort()
 
         uqique_title = origin_data['title_id'].unique()
@@ -129,7 +129,7 @@ class Prepared():
                                 # h=datetime.fromtimestamp(row.time).hour,
                             )
                         )
-                    ] += 1
+                    ] += row.watch_time
 
                     base[
                         (
@@ -140,7 +140,7 @@ class Prepared():
                                 h=datetime.fromtimestamp(row.time).hour,
                             )
                         )
-                    ] += 1
+                    ] += row.watch_time
                     total += row.watch_time
                     base[str(row.title_id)] += row.watch_time
                     base['times_{}'.format(t)] += 1

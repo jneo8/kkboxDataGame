@@ -43,7 +43,7 @@ class Train():
 
         if not limit:
             limit = 100000
-        x = read(name='events_train_v7')
+        x = read(name='events_train_v8')
         logger.debug(x.head())
         x = (
             x.iloc[0:limit]
@@ -113,7 +113,7 @@ class Train():
 
         joblib.dump(
             rfc_clf,
-            os.path.join(PKL_DIR, 'rfc_v7.pkl')
+            os.path.join(PKL_DIR, 'rfc_v8.pkl')
         )
 
 if __name__ == '__main__':
