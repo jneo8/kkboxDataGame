@@ -35,7 +35,7 @@ class Final():
 
     def __init__(self):
         """Init."""
-        x = read(name='events_test_v6')
+        x = read(name='events_test_v7')
         self.x = x
         logger.debug(x.head())
 
@@ -44,7 +44,7 @@ class Final():
         mlp_clf = joblib.load(os.path.join(PKL_DIR, 'mlp.pkl'))
         uqique_user = (
             pd.read_csv(
-                os.path.join(DATA_DIR, 'events_test_v6.csv'),
+                os.path.join(DATA_DIR, 'events_test_v7.csv'),
             )
         )['user_id'].unique()
 
@@ -67,10 +67,10 @@ class Final():
 
     def rfc(self):
         """Gen predict_data."""
-        rfc_clf = joblib.load(os.path.join(PKL_DIR, 'rfc_v6.pkl'))
+        rfc_clf = joblib.load(os.path.join(PKL_DIR, 'rfc_v7.pkl'))
         uqique_user = (
             pd.read_csv(
-                os.path.join(DATA_DIR, 'events_test_v6.csv'),
+                os.path.join(DATA_DIR, 'events_test_v7.csv'),
             )
         )['user_id'].unique()
 
@@ -89,7 +89,7 @@ class Final():
             raw_data['title_id'].append(str(t).zfill(8))
 
         df = pd.DataFrame(raw_data, columns=['user_id', 'title_id'])
-        df.to_csv(os.path.join(DATA_DIR, 'final_rfc_v6.csv'), index=False)
+        df.to_csv(os.path.join(DATA_DIR, 'final_rfc_v7.csv'), index=False)
 
 
 if __name__ == '__main__':

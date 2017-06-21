@@ -30,12 +30,12 @@ class Prepared():
         """Prepared test data."""
         self.gen(
             origin_data=self.events_train,
-            name='events_train_v6'
+            name='events_train_v7'
         )
 
         self.gen(
             origin_data=self.events_test,
-            name='events_test_v6',
+            name='events_test_v7',
         )
 
     def gen(self, origin_data, name):
@@ -102,7 +102,7 @@ class Prepared():
 
         # Start Gen
         uqique_user_len = len(uqique_user)
-        len_ = 1 + (2 * len(uqique_title)) + len(time_list_1) + len(time_list_2)
+        len_ = 2 + (2 * len(uqique_title)) + len(time_list_1) + len(time_list_2)
         logger.debug(len_)
         header = ['user_id'] + [str(x) for x in range(0, len_ - 1)]
         with open(
@@ -112,6 +112,7 @@ class Prepared():
         ) as output:
             output.write(','.join(header) + '\n')
 
+            total = 0
             for idx, u in enumerate(uqique_user):
                 list_ = [str(u)]
                 data = origin_data[(origin_data.user_id == u)]
@@ -140,6 +141,7 @@ class Prepared():
                             )
                         )
                     ] += 1
+                    total += row.watch_time
                     base[str(row.title_id)] += row.watch_time
                     base['times_{}'.format(t)] += 1
                 for t in uqique_title:
@@ -151,6 +153,9 @@ class Prepared():
                     list_.append(str(base[tl]))
                 for tl in time_list_2:
                     list_.append(str(base[tl]))
+
+                avg_watch_time = total / len(data)
+                list_.append(str(avg_watch_time))
                 logger.debug(
                     '{name} {total} : {idx}'
                     .format(
@@ -159,6 +164,7 @@ class Prepared():
                         idx=idx
                     )
                 )
+
                 output.write(','.join(list_) + '\n')
 
             # raw_data['user_id'].append(u)
