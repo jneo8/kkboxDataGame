@@ -82,27 +82,47 @@ class Prepared():
         uqique_user.sort()
 
         raw_data = {
-            t: []
-            for t in uqique_title
         }
+
+        len_ = len(uqique_user)
+        for t in uqique_title:
+            raw_data.update(
+                {
+                    t: [],
+                    'times_{}'.format(t): [],
+                }
+            )
         raw_data.update({'user_id': []})
         for idx, u in enumerate(uqique_user):
             data = self.events_train[(self.events_train.user_id == u)]
-            base = {
-                t: 0
-                for t in uqique_title
-            }
+            base = {}
+
+            for t in uqique_title:
+                base.update(
+                    {
+                        t: 0,
+                        'times_{}'.format(t): 0,
+
+                    }
+                )
             for index, row in data.iterrows():
                 base[str(row.title_id)] += row.watch_time
+                base['times_{}'.format(t)] += 1
             raw_data['user_id'].append(u)
             for t in uqique_title:
                 raw_data[t].append(base[t])
-            logger.debug(idx)
-        columns_ = [t for t in uqique_title]
+                raw_data['times_{}'.format(t)].append(
+                    base['times_{}'.format(t)]
+                )
+            logger.debug('{idx} : {len}'.format(idx=idx, len=len_))
+        columns_ = (
+            [t for t in uqique_title] +
+            ['times_{}'.format(t) for t in uqique_title]
+        )
         columns_ = ['user_id'] + columns_
         df = pd.DataFrame(raw_data, columns=columns_)
-        df.to_csv(os.path.join(DATA_DIR, 'events_train_v1.csv'))
+        df.to_csv(os.path.join(DATA_DIR, 'events_train_v2.csv'))
 
 if __name__ == '__main__':
     p = Prepared()
-    p.test()
+    p.train()
