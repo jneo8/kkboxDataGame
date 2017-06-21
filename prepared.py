@@ -40,7 +40,7 @@ class Prepared():
 
     def gen(self, origin_data, name):
         """Prepared train data."""
-        uqique_user = origin_data['user_id'].unique()
+        uqique_user = origin_data['user_id'].unique()[:100]
         uqique_user.sort()
 
         uqique_title = origin_data['title_id'].unique()
@@ -60,50 +60,95 @@ class Prepared():
 
         raw_data.update({'user_id': []})
 
-        time_list = []
+        time_list_1 = []
         for t in uqique_title:
-            for m in [6, 7, 8, 9, 10]:
-                for d in range(1, 32):
-                    for h in range(0, 24):
-                        time_list.append(
-                            '{t}_{m}_{d}_{h}'
-                            .format(t=t, m=m, d=d, h=h)
-                        )
+            # for m in [6, 7, 8, 9, 10]:
+            # for d in range(1, 32):
+            for h in range(0, 24):
+                time_list_1.append(
+                    '{t}_{h}'
+                    .format(t=t, h=h)
+                )
 
-        for tl in time_list:
+        time_list_2 = []
+        for m in [6, 7, 8, 9, 10]:
+            for d in range(1, 32):
+                for h in range(0, 24):
+                    time_list_2.append(
+                        '{m}_{d}_{h}'
+                        .format(m=m, d=d, h=h)
+                    )
+
+        for tl in time_list_1:
             raw_data.update(
                 {
                     tl: []
                 }
             )
 
+        for tl in time_list_2:
+            raw_data.update(
+                {
+                    tl: []
+                }
+            )
+
+        base_ = {}
+
+        for t in uqique_title:
+            base_.update(
+                {
+                    t: 0,
+                    'times_{}'.format(t): 0,
+
+                }
+            )
+
+        for tl in time_list_1:
+            base_.update(
+                {
+                    tl: 0
+                }
+            )
+
+        for tl in time_list_2:
+            base_.update(
+                {
+                    tl: 0
+                }
+            )
+
+        for t in uqique_title:
+            base_.update(
+                {
+                    t: 0,
+                    'times_{}'.format(t): 0,
+
+                }
+            )
+
         # Start Gen
         for idx, u in enumerate(uqique_user):
             data = origin_data[(origin_data.user_id == u)]
-            base = {}
-
-            for t in uqique_title:
-                base.update(
-                    {
-                        t: 0,
-                        'times_{}'.format(t): 0,
-
-                    }
-                )
-
-            for tl in time_list:
-                base.update(
-                    {
-                        tl: 0
-                    }
-                )
+            base = base_
 
             for index, row in data.iterrows():
                 base[
                     (
-                        '{t}_{m}_{d}_{h}'
+                        '{t}_{h}'
                         .format(
                             t=row.title_id,
+                            # m=datetime.fromtimestamp(row.time).month,
+                            # d=datetime.fromtimestamp(row.time).day,
+                            h=datetime.fromtimestamp(row.time).hour,
+                        )
+                    )
+                ] += 1
+
+                base[
+                    (
+                        '{m}_{d}_{h}'
+                        .format(
                             m=datetime.fromtimestamp(row.time).month,
                             d=datetime.fromtimestamp(row.time).day,
                             h=datetime.fromtimestamp(row.time).hour,
@@ -119,14 +164,20 @@ class Prepared():
                 raw_data['times_{}'.format(t)].append(
                     base['times_{}'.format(t)]
                 )
-            for tl in time_list:
+            for tl in time_list_1:
                 raw_data[tl].append(base[tl])
-            logger.debug('{idx} : {len}'.format(idx=idx, len=len_))
+            for tl in time_list_2:
+                raw_data[tl].append(base[tl])
+            logger.debug(
+                '{name} {idx} : {len}'
+                .format(name=name, idx=idx, len=len_)
+            )
         columns_ = (
             ['user_id'] +
             [t for t in uqique_title] +
             ['times_{}'.format(t) for t in uqique_title] +
-            [tl for tl in time_list]
+            [tl for tl in time_list_1] +
+            [tl for tl in time_list_2]
         )
         df = pd.DataFrame(raw_data, columns=columns_)
         df.to_csv(os.path.join(DATA_DIR, '{name}.csv'.format(name=name)))
