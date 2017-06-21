@@ -46,8 +46,7 @@ class Train():
         x = read(name='events_train_v2')
         logger.debug(x.head())
         x = (
-            x.drop(x.columns[[0]], axis=1)
-            .iloc[0:limit]
+            x.iloc[0:limit]
         )
         y = read(name='labels_train')
         y = y['title_id'].values.tolist()[:limit]

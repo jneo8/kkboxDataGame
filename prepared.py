@@ -30,12 +30,12 @@ class Prepared():
         """Prepared test data."""
         self.gen(
             origin_data=self.events_train,
-            name='events_train_v4'
+            name='events_train_v5'
         )
 
         self.gen(
             origin_data=self.events_test,
-            name='events_test_v4',
+            name='events_test_v5',
         )
 
     def gen(self, origin_data, name):
@@ -46,19 +46,6 @@ class Prepared():
         uqique_title = origin_data['title_id'].unique()
         uqique_title.sort()
         uqique_title = np.array([str(t) for t in uqique_title])
-
-        raw_data = {}
-
-        len_ = len(uqique_user)
-        for t in uqique_title:
-            raw_data.update(
-                {
-                    t: [],
-                    'times_{}'.format(t): [],
-                }
-            )
-
-        raw_data.update({'user_id': []})
 
         time_list_1 = []
         for t in uqique_title:
@@ -78,20 +65,6 @@ class Prepared():
                         '{m}_{d}_{h}'
                         .format(m=m, d=d, h=h)
                     )
-
-        for tl in time_list_1:
-            raw_data.update(
-                {
-                    tl: []
-                }
-            )
-
-        for tl in time_list_2:
-            raw_data.update(
-                {
-                    tl: []
-                }
-            )
 
         base_ = {}
 
@@ -128,59 +101,88 @@ class Prepared():
             )
 
         # Start Gen
-        for idx, u in enumerate(uqique_user):
-            data = origin_data[(origin_data.user_id == u)]
-            base = base_
+        uqique_user_len = len(uqique_user)
+        len_ = 1 + (2 * len(uqique_title)) + len(time_list_1) + len(time_list_2)
+        logger.debug(len_)
+        header = ['user_id'] + [str(x) for x in range(0, len_ - 1)]
+        with open(
+            os.path.join(DATA_DIR, '{name}.csv'.format(name=name)),
+            'w',
+            encoding='utf-8'
+        ) as output:
+            output.write(','.join(header) + '\n')
 
-            for index, row in data.iterrows():
-                base[
-                    (
-                        '{t}_{h}'
-                        .format(
-                            t=row.title_id,
-                            # m=datetime.fromtimestamp(row.time).month,
-                            # d=datetime.fromtimestamp(row.time).day,
-                            h=datetime.fromtimestamp(row.time).hour,
+            for idx, u in enumerate(uqique_user):
+                list_ = [str(u)]
+                data = origin_data[(origin_data.user_id == u)]
+                base = base_.copy()
+
+                for index, row in data.iterrows():
+                    base[
+                        (
+                            '{t}_{h}'
+                            .format(
+                                t=row.title_id,
+                                # m=datetime.fromtimestamp(row.time).month,
+                                # d=datetime.fromtimestamp(row.time).day,
+                                h=datetime.fromtimestamp(row.time).hour,
+                            )
                         )
-                    )
-                ] += 1
+                    ] += 1
 
-                base[
-                    (
-                        '{m}_{d}_{h}'
-                        .format(
-                            m=datetime.fromtimestamp(row.time).month,
-                            d=datetime.fromtimestamp(row.time).day,
-                            h=datetime.fromtimestamp(row.time).hour,
+                    base[
+                        (
+                            '{m}_{d}_{h}'
+                            .format(
+                                m=datetime.fromtimestamp(row.time).month,
+                                d=datetime.fromtimestamp(row.time).day,
+                                h=datetime.fromtimestamp(row.time).hour,
+                            )
                         )
+                    ] += 1
+                    base[str(row.title_id)] += row.watch_time
+                    base['times_{}'.format(t)] += 1
+                for t in uqique_title:
+                    list_.append(str(base[t]))
+                    list_.append(
+                        str(base['times_{}'.format(t)])
                     )
-                ] += 1
-
-                base[str(row.title_id)] += row.watch_time
-                base['times_{}'.format(t)] += 1
-            raw_data['user_id'].append(u)
-            for t in uqique_title:
-                raw_data[t].append(base[t])
-                raw_data['times_{}'.format(t)].append(
-                    base['times_{}'.format(t)]
+                for tl in time_list_1:
+                    list_.append(str(base[tl]))
+                for tl in time_list_2:
+                    list_.append(str(base[tl]))
+                logger.debug(
+                    '{total} : {idx}'
+                    .format(
+                        total=uqique_user_len,
+                        idx=idx
+                    )
                 )
-            for tl in time_list_1:
-                raw_data[tl].append(base[tl])
-            for tl in time_list_2:
-                raw_data[tl].append(base[tl])
-            logger.debug(
-                '{name} {idx} : {len}'
-                .format(name=name, idx=idx, len=len_)
-            )
-        columns_ = (
-            ['user_id'] +
-            [t for t in uqique_title] +
-            ['times_{}'.format(t) for t in uqique_title] +
-            [tl for tl in time_list_1] +
-            [tl for tl in time_list_2]
-        )
-        df = pd.DataFrame(raw_data, columns=columns_)
-        df.to_csv(os.path.join(DATA_DIR, '{name}.csv'.format(name=name)))
+                output.write(','.join(list_) + '\n')
+
+            # raw_data['user_id'].append(u)
+            # for t in uqique_title:
+            #     raw_data[t].append(base[t])
+            #     raw_data['times_{}'.format(t)].append(
+            #         base['times_{}'.format(t)]
+            #     )
+            # for tl in time_list_1:
+            #     raw_data[tl].append(base[tl])
+            # for tl in time_list_2:
+            #     raw_data[tl].append(base[tl])
+            # logger.debug(
+            #     '{name} {idx} : {len}'
+            #     .format(name=name, idx=idx, len=len_)
+            # )
+        # columns_ = (
+        #     ['user_id'] +
+        #     [t for t in uqique_title] +
+        #     ['times_{}'.format(t) for t in uqique_title] +
+        #     [tl for tl in time_list_1] +
+        #     [tl for tl in time_list_2]
+        # )
+        # df = pd.DataFrame(raw_data, columns=columns_)
+        # df.to_csv(os.path.join(DATA_DIR, '{name}.csv'.format(name=name)))
 
 if __name__ == '__main__':
     p = Prepared()
