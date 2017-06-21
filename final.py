@@ -62,11 +62,11 @@ class Final():
         }
         for u, t in zip(uqique_user, p):
             logger.debug('{u} {p}'.format(u=u, p=t))
-            raw_data['user_id'].append(u)
-            raw_data['title_id'].append(t)
+            raw_data['user_id'].append(str(u).zfill(8))
+            raw_data['title_id'].append(str(t).zfill(8))
 
         df = pd.DataFrame(raw_data, columns=['user_id', 'title_id'])
-        df.to_csv(os.path.join(DATA_DIR, 'final.csv'))
+        df.to_csv(os.path.join(DATA_DIR, 'final.csv'), index=False)
 
 
 if __name__ == '__main__':
