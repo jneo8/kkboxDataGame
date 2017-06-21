@@ -12,6 +12,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.model_selection import cross_val_score
 from sklearn.neural_network import MLPClassifier
 from sklearn.externals import joblib
+from sklearn.ensemble import RandomForestClassifier
+
 
 from confs import logconf
 
@@ -35,18 +37,21 @@ class Train():
 
     def __init__(self):
         """Init."""
+        limit = None
         # limit = 500
         # limit = 62307
 
+        if not limit:
+            limit = 100000
         x = read(name='events_train_v2')
         logger.debug(x.head())
         x = (
             x.drop(x.columns[[0]], axis=1)
-            # .iloc[0:limit]
+            .iloc[0:limit]
         )
         y = read(name='labels_train')
-        # y = y['title_id'].values.tolist()[:limit]
-        y = y['title_id'].values.tolist()
+        y = y['title_id'].values.tolist()[:limit]
+        # y = y['title_id'].values.tolist()
 
         test_size = 0.2
         self.x_train, self.x_test, self.y_train, self.y_test = (
@@ -58,7 +63,8 @@ class Train():
     def main(self):
         """Step."""
         # self._svm()
-        self._mlp()
+        # self._mlp()
+        self._rfc()
 
     def _svm(self):
         """SVM."""
@@ -90,20 +96,26 @@ class Train():
         )
         mlp_clf.fit(self.x_train, self.y_train)
 
-        # scores = cross_val_score(
-        #     mlp_clf,
-        #     self.x_test,
-        #     self.y_test,
-        #     cv=3,
-        #     scoring="accuracy",
-        # )
-        # logger.info(scores)
         logger.debug(
             mlp_clf.score(self.x_test, self.y_test)        
         )
         joblib.dump(
             mlp_clf,
             os.path.join(PKL_DIR, 'mlp.pkl')
+        )
+
+    def _rfc(self):
+        """RandomForestClassifier."""
+        rfc_clf = RandomForestClassifier(random_state=42)
+        rfc_clf.fit(self.x_train, self.y_train)
+        
+        logger.info(
+            rfc_clf.score(self.x_test, self.y_test)        
+        )
+
+        joblib.dump(
+            rfc_clf,
+            os.path.join(PKL_DIR, 'rfc.pkl')
         )
         
 
