@@ -42,7 +42,7 @@ class Final():
 
         logger.debug(x.head())
 
-    def gen_predict_data(self):
+    def mlp(self):
         """Gen predict_data."""
         mlp_clf = joblib.load(os.path.join(PKL_DIR, 'mlp.pkl'))
         uqique_user = (
@@ -66,9 +66,35 @@ class Final():
             raw_data['title_id'].append(str(t).zfill(8))
 
         df = pd.DataFrame(raw_data, columns=['user_id', 'title_id'])
-        df.to_csv(os.path.join(DATA_DIR, 'final.csv'), index=False)
+        df.to_csv(os.path.join(DATA_DIR, 'final_mlp.csv'), index=False)
+
+    def rfc(self):
+        """Gen predict_data."""
+        rfc_clf = joblib.load(os.path.join(PKL_DIR, 'rfc.pkl'))
+        uqique_user = (
+            pd.read_csv(
+                os.path.join(DATA_DIR, 'events_test_v2.csv'),
+            )
+        )['user_id'].unique()
+
+        p = rfc_clf.predict(self.x)
+
+        logger.debug(len(uqique_user))
+        logger.debug(len(p))
+
+        raw_data = {
+            'user_id': [],
+            'title_id': [],
+        }
+        for u, t in zip(uqique_user, p):
+            logger.debug('{u} {p}'.format(u=u, p=t))
+            raw_data['user_id'].append(str(u).zfill(8))
+            raw_data['title_id'].append(str(t).zfill(8))
+
+        df = pd.DataFrame(raw_data, columns=['user_id', 'title_id'])
+        df.to_csv(os.path.join(DATA_DIR, 'final_rfc.csv'), index=False)
 
 
 if __name__ == '__main__':
     f = Final()
-    f.gen_predict_data()
+    f.rfc()
