@@ -26,7 +26,7 @@ class Prepared():
         """Init."""
         pass
 
-    def test(self):
+    def main(self):
         """Prepared test data."""
         # self.gen(
         #     origin_data=self.events_train,
@@ -40,7 +40,7 @@ class Prepared():
 
     def gen(self, origin_data, name):
         """Prepared train data."""
-        uqique_user = origin_data['user_id'].unique()[:100]
+        uqique_user = origin_data['user_id'].unique()
         uqique_user.sort()
 
         uqique_title = origin_data['title_id'].unique()
@@ -128,4 +128,4 @@ class Prepared():
 
 if __name__ == '__main__':
     p = Prepared()
-    p.train()
+    p.main()
