@@ -30,17 +30,17 @@ class Prepared():
         """Prepared test data."""
         self.gen(
             origin_data=self.events_train,
-            name='events_train_v5'
+            name='events_train_v6'
         )
 
         self.gen(
             origin_data=self.events_test,
-            name='events_test_v5',
+            name='events_test_v6',
         )
 
     def gen(self, origin_data, name):
         """Prepared train data."""
-        uqique_user = origin_data['user_id'].unique()[:100]
+        uqique_user = origin_data['user_id'].unique()
         uqique_user.sort()
 
         uqique_title = origin_data['title_id'].unique()
@@ -49,12 +49,12 @@ class Prepared():
 
         time_list_1 = []
         for t in uqique_title:
-            # for m in [6, 7, 8, 9, 10]:
+            for m in [6, 7, 8, 9, 10]:
             # for d in range(1, 32):
-            for h in range(0, 24):
+            # for h in range(0, 24):
                 time_list_1.append(
-                    '{t}_{h}'
-                    .format(t=t, h=h)
+                    '{t}_{m}'
+                    .format(t=t, m=m)
                 )
 
         time_list_2 = []
@@ -120,12 +120,12 @@ class Prepared():
                 for index, row in data.iterrows():
                     base[
                         (
-                            '{t}_{h}'
+                            '{t}_{m}'
                             .format(
                                 t=row.title_id,
-                                # m=datetime.fromtimestamp(row.time).month,
+                                m=datetime.fromtimestamp(row.time).month,
                                 # d=datetime.fromtimestamp(row.time).day,
-                                h=datetime.fromtimestamp(row.time).hour,
+                                # h=datetime.fromtimestamp(row.time).hour,
                             )
                         )
                     ] += 1
@@ -152,8 +152,9 @@ class Prepared():
                 for tl in time_list_2:
                     list_.append(str(base[tl]))
                 logger.debug(
-                    '{total} : {idx}'
+                    '{name} {total} : {idx}'
                     .format(
+                        name=name,
                         total=uqique_user_len,
                         idx=idx
                     )
