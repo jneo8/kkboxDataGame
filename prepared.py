@@ -145,4 +145,4 @@ class Prepared():
 
 if __name__ == '__main__':
     p = Prepared()
-    p.train()
+    p.test()
