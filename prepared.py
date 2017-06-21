@@ -28,14 +28,14 @@ class Prepared():
 
     def main(self):
         """Prepared test data."""
-        # self.gen(
-        #     origin_data=self.events_train,
-        #     name='events_train_v3'
-        # )
+        self.gen(
+            origin_data=self.events_train,
+            name='events_train_v4'
+        )
 
         self.gen(
             origin_data=self.events_test,
-            name='events_test_v3',
+            name='events_test_v4',
         )
 
     def gen(self, origin_data, name):
@@ -61,10 +61,14 @@ class Prepared():
         raw_data.update({'user_id': []})
 
         time_list = []
-        for m in [6, 7, 8, 9, 10]:
-            for d in range(1, 32):
-                for h in range(0, 24):
-                    time_list.append('{m}_{d}_{h}'.format(m=m, d=d, h=h))
+        for t in uqique_title:
+            for m in [6, 7, 8, 9, 10]:
+                for d in range(1, 32):
+                    for h in range(0, 24):
+                        time_list.append(
+                            '{t}_{m}_{d}_{h}'
+                            .format(t=t, m=m, d=d, h=h)
+                        )
 
         for tl in time_list:
             raw_data.update(
@@ -97,8 +101,9 @@ class Prepared():
             for index, row in data.iterrows():
                 base[
                     (
-                        '{m}_{d}_{h}'
+                        '{t}_{m}_{d}_{h}'
                         .format(
+                            t=row.title_id,
                             m=datetime.fromtimestamp(row.time).month,
                             d=datetime.fromtimestamp(row.time).day,
                             h=datetime.fromtimestamp(row.time).hour,
