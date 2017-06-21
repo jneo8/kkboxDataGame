@@ -35,20 +35,18 @@ class Train():
 
     def __init__(self):
         """Init."""
-        # train_x = pd.read_csv(os.path.join(DATA_DIR, 'events_train_v1.csv'))
-
-        limit = 500
+        # limit = 500
         # limit = 62307
 
-        x = read(name='events_train_v1')
+        x = read(name='events_train_v2')
         logger.debug(x.head())
         x = (
             x.drop(x.columns[[0]], axis=1)
-            .iloc[0:limit]
+            # .iloc[0:limit]
         )
         y = read(name='labels_train')
-        y = y['title_id'].values.tolist()[:limit]
-        # y = y['title_id'].values.tolist()
+        # y = y['title_id'].values.tolist()[:limit]
+        y = y['title_id'].values.tolist()
 
         test_size = 0.2
         self.x_train, self.x_test, self.y_train, self.y_test = (
@@ -80,18 +78,33 @@ class Train():
 
     def _mlp(self):
         """MLP."""
-        mlp_clf = MLPClassifier()
+        mlp_clf = MLPClassifier(
+            hidden_layer_sizes=(10, 5),
+            max_iter=10,
+            alpha=1e-4,
+            solver='adam',
+            verbose=10,
+            tol=1e-4,
+            random_state=1,
+            learning_rate_init=.1,
+        )
         mlp_clf.fit(self.x_train, self.y_train)
 
-        scores = cross_val_score(
-            mlp_clf,
-            self.x_test,
-            self.y_test,
-            cv=3,
-            scoring="accuracy",
+        # scores = cross_val_score(
+        #     mlp_clf,
+        #     self.x_test,
+        #     self.y_test,
+        #     cv=3,
+        #     scoring="accuracy",
+        # )
+        # logger.info(scores)
+        logger.debug(
+            mlp_clf.score(self.x_test, self.y_test)        
         )
-        logger.info(scores)
-        joblib.dump(mlp_clf, 'mlp.pkl')
+        joblib.dump(
+            mlp_clf,
+            os.path.join(PKL_DIR, 'mlp.pkl')
+        )
         
 
 if __name__ == '__main__':
