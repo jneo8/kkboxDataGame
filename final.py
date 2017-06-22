@@ -35,7 +35,7 @@ class Final():
 
     def __init__(self):
         """Init."""
-        x = read(name='events_test_v2')
+        x = read(name='events_test_v3')
         self.x = (
             x.drop(x.columns[[0]], axis=1)
         )
@@ -73,7 +73,7 @@ class Final():
         rfc_clf = joblib.load(os.path.join(PKL_DIR, 'rfc.pkl'))
         uqique_user = (
             pd.read_csv(
-                os.path.join(DATA_DIR, 'events_test_v2.csv'),
+                os.path.join(DATA_DIR, 'events_test_v3.csv'),
             )
         )['user_id'].unique()
 
@@ -92,7 +92,7 @@ class Final():
             raw_data['title_id'].append(str(t).zfill(8))
 
         df = pd.DataFrame(raw_data, columns=['user_id', 'title_id'])
-        df.to_csv(os.path.join(DATA_DIR, 'final_rfc.csv'), index=False)
+        df.to_csv(os.path.join(DATA_DIR, 'final_rfc_v3.csv'), index=False)
 
 
 if __name__ == '__main__':

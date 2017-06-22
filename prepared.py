@@ -75,7 +75,7 @@ class Prepared():
 
         # Start Gen
         for idx, u in enumerate(uqique_user):
-            data = origin_data[(self.events_train.user_id == u)]
+            data = origin_data[(origin_data.user_id == u)]
             base = {}
 
             for t in uqique_title:
